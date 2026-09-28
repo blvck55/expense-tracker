@@ -1,49 +1,42 @@
 # Expense Tracker
 
-A cross-platform personal finance management application built with Flutter and Firebase. The application enables users to securely manage income and expenses, organize transactions, attach receipts, analyze spending patterns, and customize their experience through multi-currency and light/dark theme support.
+A cross-platform personal finance management application built with Flutter, Dart, and Firebase.
 
-The application uses Firebase Authentication for secure user accounts and Cloud Firestore for real-time cloud data synchronization.
+Expense Tracker allows users to securely manage their income and expenses, analyze spending patterns through interactive visualizations, attach receipt images, search and filter transactions, and customize currency and theme preferences.
+
+The application uses Firebase Authentication and Cloud Firestore for user authentication, cloud storage, real-time synchronization, and offline data persistence, while SharedPreferences is used for persistent local application preferences.
 
 ---
 
 ## Table of Contents
 
 * [Overview](#overview)
-* [Features](#features)
+* [Key Features](#key-features)
 
-  * [User Authentication](#user-authentication)
-  * [Income and Expense Management](#income-and-expense-management)
-  * [Transaction Categories](#transaction-categories)
-  * [Receipt Attachments](#receipt-attachments)
-  * [Financial Dashboard](#financial-dashboard)
-  * [Real-Time Cloud Synchronization](#real-time-cloud-synchronization)
-  * [Financial Analytics](#financial-analytics)
-  * [Statistics](#statistics)
-  * [Multi-Currency Support](#multi-currency-support)
-  * [Theme Customization](#theme-customization)
-  * [Profile and Settings](#profile-and-settings)
+  * [User Authentication](#1-user-authentication)
+  * [Real-Time Expense Management](#2-real-time-expense-management-crud)
+  * [Analytics and Insights](#3-analytics-and-insights)
+  * [Search and Multi-Criteria Filtering](#4-search-and-multi-criteria-filtering)
+  * [Currency and Theme Preferences](#5-persistent-currency-and-theme-preferences)
+  * [Real-Time Cloud Synchronization](#6-real-time-cloud-synchronization)
 * [Technology Stack](#technology-stack)
 * [Architecture](#architecture)
 * [Project Structure](#project-structure)
 * [Application Flow](#application-flow)
-* [Transaction Flow](#transaction-flow)
+* [Transaction Data Flow](#transaction-data-flow)
 * [Firebase Integration](#firebase-integration)
-* [Data Isolation](#data-isolation)
 * [Data Model](#data-model)
 * [State Management](#state-management)
-* [Recent Improvements](#recent-improvements)
-* [Dependencies](#dependencies)
+* [UI and UX](#ui-and-ux)
 * [Getting Started](#getting-started)
 * [Firebase Configuration](#firebase-configuration)
 * [Running the Application](#running-the-application)
-* [Testing](#testing)
+* [Testing and Code Quality](#testing-and-code-quality)
 * [Supported Platforms](#supported-platforms)
 * [Security](#security)
-* [UI and UX](#ui-and-ux)
 * [Screenshots](#screenshots)
 * [Future Improvements](#future-improvements)
 * [Contributing](#contributing)
-* [Issue Reporting](#issue-reporting)
 * [License](#license)
 * [Author](#author)
 * [Project Status](#project-status)
@@ -52,46 +45,43 @@ The application uses Firebase Authentication for secure user accounts and Cloud 
 
 # Overview
 
-Expense Tracker is a personal finance management application designed to simplify the process of recording, monitoring, and analyzing financial activity.
+Expense Tracker is a personal finance management application designed to provide users with a simple and centralized way to record, manage, search, and analyze their financial transactions.
 
-The application provides users with a centralized platform for managing income and expenses while providing visual insights into their spending patterns.
+The application combines a modern Material 3 interface with Firebase-powered cloud synchronization and local preference persistence.
 
-Users can create and manage transactions, categorize financial activity, attach receipts, view financial summaries, analyze spending through interactive charts, and customize the application according to their preferences.
+Users can:
 
-The application is built using Flutter and Firebase, allowing it to support multiple platforms while maintaining cloud-based data synchronization.
-
-## Objectives
-
-* Provide a simple interface for recording income and expenses.
-* Allow users to create, view, edit, and delete financial transactions.
-* Provide real-time synchronization using Cloud Firestore.
-* Provide visual representations of spending and income.
-* Help users understand their spending patterns.
-* Keep financial data isolated between user accounts.
-* Support multiple currencies.
-* Provide light and dark theme customization.
-* Maintain a modular and maintainable application architecture.
-* Provide cross-platform support through Flutter.
+* Create income and expense records
+* Edit and delete transactions
+* Categorize financial activity
+* Attach receipt images
+* Search transactions
+* Apply multiple filters
+* Navigate between monthly summaries
+* Analyze spending using interactive charts
+* Select a preferred currency
+* Switch between light, dark, and system themes
+* Synchronize financial data in real time
 
 ---
 
-# Features
+# Key Features
 
-## User Authentication
+## 1. User Authentication
 
 The application uses Firebase Authentication to provide secure account management.
 
-Features include:
+### Features
 
-* User registration
-* User login
-* Authentication state management
-* Automatic authentication routing
-* Session management
-* User logout
-* User-specific data access
-
-The application uses an `AuthWrapper` to determine whether the user should be directed to the authentication interface or the main application.
+* Email and password registration
+* Email and password sign-in
+* Automatic authentication state monitoring
+* Persistent user sessions
+* Automatic login state restoration
+* User-specific transaction data
+* Authenticated user ID tracking
+* Account and Firebase service status indicators
+* Secure logout
 
 ### Authentication Flow
 
@@ -99,7 +89,10 @@ The application uses an `AuthWrapper` to determine whether the user should be di
 Application Launch
         |
         v
-Firebase Authentication
+Firebase Initialization
+        |
+        v
+Authentication State Check
         |
         +----------------------+
         |                      |
@@ -110,116 +103,228 @@ Firebase Authentication
 Login / Register           Home Screen
 ```
 
+The authentication state is managed through `AuthProvider` and the Firebase Authentication service.
+
 ---
 
-## Income and Expense Management
+# 2. Real-Time Expense Management (CRUD)
 
-Users can manage financial transactions through full CRUD functionality.
+The application provides complete CRUD functionality for financial transactions.
 
-Supported operations:
+CRUD operations include:
 
-* Create transactions
-* View transactions
-* Update transactions
-* Delete transactions
+* Create
+* Read
+* Update
+* Delete
 
-Each transaction can contain:
+## Add Expense
 
+Users can create a new transaction containing:
+
+* Title
 * Amount
-* Transaction type
 * Category
 * Date
-* Payment method
-* Notes
+* Optional notes
 * Receipt image
-* Timestamp
-* User ID
+* Transaction information
 
-The application supports both income and expense transactions.
+## Edit and Update
 
----
+Existing transactions can be edited and updated.
 
-## Transaction Categories
+Changes are synchronized with Cloud Firestore and reflected in the application through the real-time Firestore stream.
 
-Transactions can be assigned to predefined financial categories.
+## Delete Expense
 
-### Expense Categories
-
-* Food
-* Transport
-* Bills
-* Shopping
-* Entertainment
-* Health
-
-### Income Categories
-
-* Salary
-* Investment
-
-Categories are used for transaction organization and financial analytics.
-
----
+Users can delete transactions through a confirmation process to reduce accidental deletion.
 
 ## Receipt Attachments
 
-Users can attach receipt or bill images to individual transactions.
+Users can attach receipt images to transactions.
 
-The application supports:
+Supported sources include:
 
-* Capturing images using the device camera
-* Selecting images from the device gallery
-* Previewing selected images
-* Associating receipt images with transactions
+* Device camera
+* Device gallery
 
-Image selection and camera/gallery access are handled using the `image_picker` package.
+Receipt images are processed for use within the application and can be displayed as transaction previews.
 
 ---
 
-## Financial Dashboard
+# 3. Analytics and Insights
 
-The Home screen provides an overview of the user's financial activity.
+Expense Tracker provides visual analytics to help users understand their spending patterns.
 
-The dashboard includes:
+## Monthly Summary
 
-* Current net balance
-* Total income
-* Total expenses
-* Recent transactions
-* Monthly financial summary
-* Spending overview
-* Cloud synchronization status
+The dashboard provides a monthly financial summary that calculates the total expenses for the currently selected month.
+
+Users can navigate between months using:
+
+* Previous month
+* Current month
+* Next month
+
+The summary is recalculated based on the selected month and available transactions.
+
+## Interactive Pie Charts
+
+The application uses `fl_chart` to provide interactive visualizations of transaction categories.
 
 Example:
 
 ```text
-Net Balance
-LKR 125,450.00
+          Expense Distribution
 
-Total Income
-LKR 185,000.00
+              Food
+               35%
 
-Total Expenses
-LKR 59,550.00
+     Bills              Shopping
+      20%                  18%
+
+          Transport
+             15%
+
+        Entertainment
+              12%
 ```
 
-The dashboard is designed to provide users with a quick understanding of their current financial position.
+## Category Breakdown
+
+The application provides a detailed category breakdown containing:
+
+* Category name
+* Total amount
+* Percentage of overall expenses
+* Visual representation
+
+This allows users to identify which categories contribute most to their spending.
 
 ---
 
-## Real-Time Cloud Synchronization
+# 4. Search and Multi-Criteria Filtering
 
-The application uses Cloud Firestore real-time stream subscriptions to keep financial data synchronized with the cloud.
+The application provides flexible transaction discovery through multiple filtering mechanisms.
 
-When a transaction is:
+## Keyword Search
 
-* Added
-* Edited
-* Deleted
+Users can dynamically search transactions using:
 
-the corresponding changes are automatically reflected in the application UI through Firestore's real-time data streams.
+* Transaction title
+* Description or notes
 
-Users do not need to manually refresh the application to see synchronized transaction changes.
+Search results update as the user enters text.
+
+## Category Filter
+
+Transactions can be filtered according to their category.
+
+Example categories include:
+
+* Food
+* Utilities
+* Transportation
+* Entertainment
+* Shopping
+* Bills
+* Health
+* Other supported categories
+
+## Date Range Filter
+
+Users can select a custom date range to display transactions within a specific period.
+
+For example:
+
+```text
+01 September 2026
+        |
+        v
+30 September 2026
+```
+
+Only transactions falling within the selected date interval are displayed.
+
+## Combined Filtering
+
+Search, category, and date filters can be used together to narrow down transaction results.
+
+Conceptually:
+
+```text
+All Transactions
+       |
+       +---- Keyword Search
+       |
+       +---- Category Filter
+       |
+       +---- Date Range
+       |
+       v
+Filtered Transactions
+```
+
+## Clear Filters
+
+A dedicated `Clear Filters` control allows users to reset the active filters with one action.
+
+---
+
+# 5. Persistent Currency and Theme Preferences
+
+The application provides customizable financial display preferences.
+
+## Multi-Currency Support
+
+Supported currencies include:
+
+| Currency                    | Code |
+| --------------------------- | ---- |
+| Sri Lankan Rupee            | LKR  |
+| United States Dollar        | USD  |
+| Euro                        | EUR  |
+| British Pound               | GBP  |
+| Indian Rupee                | INR  |
+| Australian Dollar           | AUD  |
+| Canadian Dollar             | CAD  |
+| Japanese Yen                | JPY  |
+| Singapore Dollar            | SGD  |
+| United Arab Emirates Dirham | AED  |
+| Saudi Riyal                 | SAR  |
+| New Zealand Dollar          | NZD  |
+
+Currency formatting is handled using the `intl` package.
+
+## Persistent Preferences
+
+The application uses `SharedPreferences` to store user-selected preferences locally.
+
+Persisted settings include:
+
+* Selected currency
+* Theme preference
+
+This means the selected settings remain available after the application is closed and reopened.
+
+## Theme Modes
+
+The application supports:
+
+* Light Mode
+* Dark Mode
+* System Default
+
+The theme system is built using Material 3.
+
+---
+
+# 6. Real-Time Cloud Synchronization
+
+Cloud Firestore is used to provide real-time transaction synchronization.
+
+When a transaction is added, edited, or deleted, the Firestore stream updates the application state automatically.
 
 ### Synchronization Flow
 
@@ -236,7 +341,7 @@ FirestoreService
 Cloud Firestore
      |
      v
-Real-Time Stream
+Real-Time Document Stream
      |
      v
 ExpenseProvider
@@ -245,310 +350,88 @@ ExpenseProvider
 Updated UI
 ```
 
-### Sync Status Indicators
+This eliminates the need for users to manually refresh the transaction list after making changes.
 
-The application provides visible synchronization indicators in multiple areas.
+## Live Sync Indicator
 
-#### Home Screen AppBar
+The Home screen displays a `Live Sync` status indicator to communicate the application's cloud synchronization state.
 
-A `Live Sync` badge indicates that the application is connected to the real-time synchronization system.
+## Cloud Sync Summary
 
-#### Monthly Summary Card
+The monthly summary area also provides a `Synced with Cloud Firestore` status indicator.
 
-A `Synced with Cloud Firestore` indicator provides additional confirmation that financial data is synchronized with the cloud.
+## Firebase Service Status
 
-#### Settings and Profile
-
-The Settings and Profile screen contains an account and Firebase service status section displaying:
+The Settings screen provides an account and Firebase service status section containing information such as:
 
 * Firebase service status
-* Firestore connectivity information
-* Current authenticated user ID
+* Firestore synchronization state
+* Authenticated user ID
 
-Example:
-
-```text
-Account & Firebase Service Status
-
-Status: Active
-Service: Cloud Firestore
-Synchronization: Active
-User ID: <authenticated-user-id>
-```
-
----
-
-## Financial Analytics
-
-The application provides graphical financial analytics using the `fl_chart` package.
-
-Analytics include:
-
-* Spending distribution
-* Category-based spending
-* Income versus expenses
-* Spending trends
-* Transaction summaries
-
-Charts are generated from the user's transaction data.
-
----
-
-## Statistics
-
-The Statistics screen provides a dedicated interface for analyzing financial activity.
-
-Users can view:
-
-* Spending distribution by category
-* Income versus expense comparisons
-* Total income
-* Total expenses
-* Net balance
-* Transaction counts
-* Category spending information
-
-Example:
-
-```text
-Food              32%
-Bills             20%
-Transport         18%
-Shopping          15%
-Entertainment     10%
-Other              5%
-```
-
-The statistics interface provides a visual representation of financial activity, helping users identify spending patterns.
-
----
-
-## Multi-Currency Support
-
-The application supports dynamic currency selection.
-
-Users can select their preferred currency through the settings interface.
-
-Supported currencies can include:
-
-* LKR — Sri Lankan Rupee
-* USD — United States Dollar
-* EUR — Euro
-* GBP — British Pound
-* INR — Indian Rupee
-* AUD — Australian Dollar
-
-Currency formatting is handled using the `intl` package.
-
-The selected currency is applied throughout the application's financial interface.
-
----
-
-## Theme Customization
-
-The application supports light and dark themes using Material 3.
-
-Available theme modes:
-
-* Light
-* Dark
-* System Default
-
-### Light Theme
-
-| Purpose        | Colour    |
-| -------------- | --------- |
-| Primary        | `#10B981` |
-| Primary Dark   | `#059669` |
-| Background     | `#F8FAFC` |
-| Surface        | `#FFFFFF` |
-| Primary Text   | `#0F172A` |
-| Secondary Text | `#64748B` |
-| Border         | `#E2E8F0` |
-| Income         | `#22C55E` |
-| Expense        | `#EF4444` |
-| Warning        | `#F59E0B` |
-
-### Dark Theme
-
-| Purpose        | Colour    |
-| -------------- | --------- |
-| Background     | `#0F172A` |
-| Surface        | `#1E293B` |
-| Primary        | `#34D399` |
-| Primary Text   | `#F8FAFC` |
-| Secondary Text | `#94A3B8` |
-| Border         | `#334155` |
-| Income         | `#4ADE80` |
-| Expense        | `#F87171` |
-
----
-
-## Profile and Settings
-
-The Settings and Profile screen allows users to manage account and application preferences.
-
-Features include:
-
-* View profile information
-* Manage account preferences
-* Select preferred currency
-* Change application theme
-* View Firebase service status
-* View Firestore synchronization status
-* View authenticated user information
-* Sign out
+These indicators provide greater transparency regarding the application's cloud connectivity and synchronization state.
 
 ---
 
 # Technology Stack
 
-| Category                     | Technology              |
-| ---------------------------- | ----------------------- |
-| Framework                    | Flutter                 |
-| Programming Language         | Dart                    |
-| UI Framework                 | Material 3              |
-| State Management             | Provider                |
-| Authentication               | Firebase Authentication |
-| Database                     | Cloud Firestore         |
-| Charts                       | fl_chart                |
-| Image Handling               | image_picker            |
-| Date and Currency Formatting | intl                    |
-| Backend Services             | Firebase                |
-| Platforms                    | Android, iOS, Web       |
+| Layer             | Technology / Package    | Purpose                                      |
+| ----------------- | ----------------------- | -------------------------------------------- |
+| Framework         | Flutter 3.x             | Cross-platform application development       |
+| Language          | Dart                    | Application programming language             |
+| UI                | Material 3              | Application design system                    |
+| State Management  | Provider `^6.1.2`       | Application state management                 |
+| Authentication    | Firebase Authentication | User authentication and sessions             |
+| Firebase Core     | firebase_core           | Firebase platform initialization             |
+| Database          | Cloud Firestore         | Cloud database and real-time synchronization |
+| Local Persistence | shared_preferences      | Persistent local preferences                 |
+| Analytics         | fl_chart `^0.68.0`      | Charts and financial visualization           |
+| Media             | image_picker `^1.1.2`   | Camera and gallery image selection           |
+| Formatting        | intl `^0.19.0`          | Currency and date formatting                 |
 
 ---
 
 # Architecture
 
-The application follows a layered architecture that separates the user interface, application state, business logic, external services, and data models.
+The application follows a layered architecture that separates presentation, state management, services, and persistence.
 
 ```text
-Presentation Layer
-        |
-        v
-State Management Layer
-        |
-        v
-Services Layer
-        |
-        v
-Firebase
-        |
-        v
-Cloud Firestore
+┌─────────────────────────────────────────────┐
+│           Presentation Layer                │
+│                                             │
+│ Screens • Widgets • Dialogs                 │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│         State Management Layer              │
+│                                             │
+│ MultiProvider                               │
+│ ├── AuthProvider                            │
+│ ├── ExpenseProvider                         │
+│ ├── ThemeProvider                           │
+│ └── CurrencyProvider                        │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│             Services Layer                  │
+│                                             │
+│ AuthService                                 │
+│ FirestoreService                            │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│       Data Persistence & Backend            │
+│                                             │
+│ Cloud Firestore                             │
+│ ├── Remote database                         │
+│ └── Offline persistence                     │
+│                                             │
+│ SharedPreferences                           │
+│ └── Local user preferences                  │
+└─────────────────────────────────────────────┘
 ```
-
-This separation improves:
-
-* Maintainability
-* Scalability
-* Testability
-* Code organization
-* Separation of responsibilities
-
----
-
-## Presentation Layer
-
-The presentation layer contains application screens and reusable UI components.
-
-```text
-screens/
-widgets/
-```
-
-Responsibilities include:
-
-* Rendering application screens
-* Handling user interaction
-* Displaying financial information
-* Displaying charts
-* Managing forms
-* Displaying loading states
-* Displaying error states
-* Displaying synchronization status
-
----
-
-## State Management Layer
-
-The application uses Provider for application state management.
-
-```text
-providers/
-```
-
-### AuthProvider
-
-Responsible for:
-
-* Authentication state
-* Current authenticated user
-* Login status
-* Logout operations
-
-### ExpenseProvider
-
-Responsible for:
-
-* Loading transactions
-* Adding transactions
-* Updating transactions
-* Deleting transactions
-* Maintaining transaction state
-* Calculating financial summaries
-* Listening to real-time Firestore updates
-* Updating the UI when Firestore data changes
-
-Transaction saving and updating are handled without unnecessary global loading-state triggers. This allows the application interface to remain responsive while financial records are being saved or updated.
-
-### ThemeProvider
-
-Responsible for:
-
-* Light theme
-* Dark theme
-* System theme
-* Theme switching
-
-### CurrencyProvider
-
-Responsible for:
-
-* Selected currency
-* Currency changes
-* Currency formatting
-
----
-
-## Services Layer
-
-```text
-services/
-```
-
-The services layer separates external services and business operations from the user interface.
-
-### AuthService
-
-Handles Firebase Authentication operations including:
-
-* User registration
-* User login
-* User logout
-* Authentication state
-
-### FirestoreService
-
-Handles Cloud Firestore operations including:
-
-* Creating transactions
-* Reading transactions
-* Updating transactions
-* Deleting transactions
-* Retrieving user-specific transactions
-* Providing real-time transaction streams
 
 ---
 
@@ -556,25 +439,36 @@ Handles Cloud Firestore operations including:
 
 ```text
 lib/
-|
+│
 ├── app/
-│   ├── app_colors.dart
-│   └── app_theme.dart
+│   ├── constants/
+│   │   ├── categories.dart
+│   │   ├── icons.dart
+│   │   └── colors.dart
+│   │
+│   └── theme/
+│       ├── app_theme.dart
+│       └── theme configuration
 │
 ├── models/
 │   └── expense_model.dart
+│       └── Data model and Firestore serializer
 │
 ├── providers/
 │   ├── auth_provider.dart
+│   │   └── Authentication state management
+│   │
+│   ├── currency_provider.dart
+│   │   └── Persistent currency selection
+│   │
 │   ├── expense_provider.dart
-│   ├── theme_provider.dart
-│   └── currency_provider.dart
-│
-├── services/
-│   ├── auth_service.dart
-│   └── firestore_service.dart
+│   │   └── CRUD operations and live filtering
+│   │
+│   └── theme_provider.dart
+│       └── Persistent light/dark theme state
 │
 ├── screens/
+│   │
 │   ├── auth/
 │   │   ├── login_screen.dart
 │   │   └── register_screen.dart
@@ -594,18 +488,28 @@ lib/
 │   └── widgets/
 │       ├── expense_card.dart
 │       ├── summary_card.dart
-│       └── empty_state.dart
+│       ├── empty_state.dart
+│       └── image preview widgets
+│
+├── services/
+│   ├── auth_service.dart
+│   │   └── Firebase Authentication service
+│   │
+│   └── firestore_service.dart
+│       └── Cloud Firestore streaming and CRUD
 │
 ├── firebase_options.dart
+│   └── Platform-specific Firebase configuration
 │
 └── main.dart
+    └── Firebase initialization and root application widget
 ```
 
 ---
 
 # Application Flow
 
-The primary application flow is:
+The overall application flow is:
 
 ```text
 Application Launch
@@ -614,37 +518,41 @@ Application Launch
 Firebase Initialization
         |
         v
-Authentication Check
+Authentication State
         |
-        +----------------------+
-        |                      |
-        v                      v
-   Logged Out              Logged In
-        |                      |
-        v                      v
-Login / Register           Home Screen
-                               |
-                +--------------+--------------+
-                |              |              |
-                v              v              v
-          Transactions     Statistics     Settings
-                |
-                v
-        Add / Edit Transaction
+        +--------------------------+
+        |                          |
+        v                          v
+   Not Authenticated          Authenticated
+        |                          |
+        v                          v
+ Login / Register              Home Screen
+                                   |
+              +--------------------+--------------------+
+              |                    |                    |
+              v                    v                    v
+        Transactions          Statistics           Settings
+              |
+              v
+       Add / Edit Expense
+              |
+              v
+       Cloud Firestore
+              |
+              v
+      Real-Time UI Update
 ```
 
 ---
 
-# Transaction Flow
+# Transaction Data Flow
 
-The transaction management process follows this structure:
+A transaction follows the following process when it is created or modified:
 
 ```text
 User
  |
- v
-Add / Edit Transaction
- |
+ | Add / Edit Transaction
  v
 ExpenseProvider
  |
@@ -654,37 +562,37 @@ FirestoreService
  v
 Cloud Firestore
  |
- v
-Real-Time Firestore Stream
- |
+ | Real-Time Snapshot
  v
 ExpenseProvider
  |
  v
-Updated UI
+Filtered / Calculated State
+ |
+ v
+UI
 ```
 
-The use of real-time Firestore streams means that changes are reflected in the application without requiring a manual refresh.
+The same architecture supports:
+
+* Adding transactions
+* Updating transactions
+* Deleting transactions
+* Filtering transactions
+* Monthly calculations
+* Analytics
 
 ---
 
 # Firebase Integration
 
-The application uses Firebase as its cloud backend.
+Firebase provides the application's backend infrastructure.
 
-## Firebase Services
+## Firebase Services Used
 
-```text
-Firebase Core
-Firebase Authentication
-Cloud Firestore
-```
+### Firebase Core
 
----
-
-## Firebase Initialization
-
-Firebase is explicitly initialized using platform-specific configuration.
+Responsible for initializing Firebase for the current platform.
 
 The application uses:
 
@@ -694,195 +602,207 @@ Firebase.initializeApp(
 );
 ```
 
-The Firebase configuration is provided through:
+The platform-specific configuration is stored in:
 
 ```text
 lib/firebase_options.dart
 ```
 
-Using `DefaultFirebaseOptions.currentPlatform` ensures that the appropriate Firebase configuration is selected for the current platform.
+### Firebase Authentication
 
-This is particularly important for mobile deployments such as Android and iOS.
-
----
-
-## Firebase Authentication
-
-Firebase Authentication is responsible for:
+Used for:
 
 * User registration
 * User login
-* Authentication state
-* User sessions
+* Session management
+* Authentication state monitoring
 * Logout
 
----
+### Cloud Firestore
 
-## Cloud Firestore
+Used for:
 
-Cloud Firestore is responsible for:
-
-* Storing financial transactions
-* Real-time transaction synchronization
-* Transaction creation
-* Transaction updates
-* Transaction deletion
-* User-specific financial data
-
-The application uses Firestore stream subscriptions to receive changes in real time.
+* Transaction storage
+* Transaction CRUD operations
+* Real-time document streaming
+* User-specific data
+* Offline persistence
 
 ---
 
-# Data Isolation
+# Firestore Real-Time Streaming
 
-Each transaction is associated with the authenticated user's unique Firebase user ID.
+The application uses Firestore document snapshot streams to receive transaction changes.
 
 Conceptually:
 
-```text
-User
- |
- +-- userId
-      |
-      +-- Transaction
-      +-- Transaction
-      +-- Transaction
+```dart
+Stream<List<ExpenseModel>>
 ```
 
-The application uses the authenticated user's ID to scope financial records to the appropriate account.
+The stream allows the application to react to changes in Firestore without requiring manual refresh operations.
 
-Firestore Security Rules should enforce this restriction at the database level.
+For example:
+
+```text
+Device A
+   |
+   | Add Transaction
+   v
+Cloud Firestore
+   |
+   | Snapshot Update
+   v
+ExpenseProvider
+   |
+   v
+Updated UI
+```
+
+---
+
+# Offline Persistence
+
+Cloud Firestore provides local caching and offline persistence capabilities.
+
+This allows the application to maintain a locally available representation of Firestore data and synchronize changes when connectivity is restored, subject to the Firebase platform configuration and Firestore behavior.
+
+This improves the application's resilience when network connectivity is temporarily unavailable.
 
 ---
 
 # Data Model
 
-The primary transaction model is:
+The main transaction data model is:
 
 ```text
 ExpenseModel
 ```
 
-A transaction can contain:
+A transaction can contain information such as:
 
 ```text
 id
 userId
+title
 amount
-type
 category
 date
-paymentMethod
-note
-imageUrl / imageReference
+notes
+receipt/image data
 createdAt
 ```
 
-The model provides Firestore mapping and `copyWith` functionality for creating updated instances.
+The model is responsible for converting transaction data between the application representation and Firestore documents.
+
+It also supports creating modified copies of transactions through `copyWith`.
 
 ---
 
-# Recent Improvements
+# State Management
 
-The following improvements were implemented to improve Firebase reliability, application responsiveness, and synchronization visibility.
+The application uses the Provider package with a `MultiProvider` architecture.
 
-## Firebase Initialization
+## AuthProvider
 
-Updated `lib/main.dart` to explicitly initialize Firebase with:
+Responsible for:
 
-```dart
-Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
-```
+* Authentication state
+* Current authenticated user
+* Login state
+* Logout
+* Authentication changes
 
-This ensures that the correct Firebase configuration from `lib/firebase_options.dart` is used for the current platform.
+## ExpenseProvider
 
-This improves Firebase Authentication and Cloud Firestore initialization on supported mobile platforms.
+Responsible for:
+
+* Transaction state
+* Firestore transaction streams
+* Adding expenses
+* Updating expenses
+* Deleting expenses
+* Search
+* Category filtering
+* Date range filtering
+* Clearing filters
+* Monthly calculations
+* Expense summaries
+* Category breakdowns
+
+The provider also ensures that Firestore changes are propagated to the UI in real time.
+
+## ThemeProvider
+
+Responsible for:
+
+* Light theme
+* Dark theme
+* System theme
+* Persisting theme preference
+
+## CurrencyProvider
+
+Responsible for:
+
+* Currency selection
+* Currency persistence
+* Currency formatting
 
 ---
 
-## ExpenseProvider Improvements
+# UI and UX
 
-Updated:
+The application follows a modern Material 3 design system.
+
+## Design Principles
+
+### Clear Financial Hierarchy
+
+Important financial information such as:
+
+* Total expenses
+* Total income
+* Net balance
+* Monthly totals
+
+is given visual priority.
+
+### Consistent Components
+
+Reusable components are used for:
+
+* Transaction cards
+* Summary cards
+* Empty states
+* Dialogs
+* Image previews
+* Filter controls
+
+### Responsive Interface
+
+Flutter's cross-platform UI system allows the application to adapt to supported screen sizes and platforms.
+
+### Light and Dark Themes
+
+The interface supports:
 
 ```text
-lib/providers/expense_provider.dart
+Light Mode
+Dark Mode
+System Default
 ```
 
-The `addExpense` and `updateExpense` operations were improved to avoid unnecessary global loading-state triggers.
+### Feedback
 
-Previously, unnecessary loading state changes could block parts of the interface and result in an unresponsive or frozen UI during transaction operations.
+The application provides feedback for important operations such as:
 
-The updated implementation allows transaction operations to complete while keeping the interface responsive.
-
----
-
-## Real-Time Firestore Synchronization
-
-Cloud Firestore stream subscriptions are used to automatically propagate transaction changes to the application.
-
-This means:
-
-```text
-Add Transaction
-       |
-       v
-Cloud Firestore
-       |
-       v
-Firestore Stream
-       |
-       v
-ExpenseProvider
-       |
-       v
-UI Automatically Updated
-```
-
-The same process applies when transactions are edited or deleted.
-
----
-
-## Synchronization Status Indicators
-
-The application now provides visible synchronization information.
-
-### Home AppBar
-
-A `Live Sync` badge indicates the availability of real-time synchronization.
-
-### Monthly Summary
-
-A `Synced with Cloud Firestore` indicator communicates that the financial summary is synchronized with the cloud.
-
-### Settings and Profile
-
-An `Account & Firebase Service Status` section provides Firebase and Firestore service information, including the authenticated user's ID.
-
-These indicators improve transparency by allowing users to understand the application's cloud synchronization state.
-
----
-
-# Dependencies
-
-The primary dependencies include:
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-
-  firebase_core:
-  firebase_auth:
-  cloud_firestore:
-  provider:
-  fl_chart:
-  image_picker:
-  intl:
-```
-
-The exact dependency versions are maintained in `pubspec.yaml`.
+* Adding transactions
+* Updating transactions
+* Deleting transactions
+* Filtering
+* Synchronization
+* Authentication
 
 ---
 
@@ -890,15 +810,15 @@ The exact dependency versions are maintained in `pubspec.yaml`.
 
 ## Prerequisites
 
-Install the following before setting up the project:
+Before running the project, install:
 
 * Flutter SDK
 * Dart SDK
 * Android Studio or Visual Studio Code
 * Git
-* A Firebase project
+* Firebase project
 
-Verify the Flutter installation:
+Verify Flutter:
 
 ```bash
 flutter doctor
@@ -914,7 +834,7 @@ Clone the repository:
 git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
 ```
 
-Navigate to the project directory:
+Navigate to the project:
 
 ```bash
 cd expense_tracker
@@ -930,54 +850,82 @@ flutter pub get
 
 # Firebase Configuration
 
-Create a Firebase project and configure the required Firebase services.
+Create a Firebase project through the Firebase Console.
 
-Enable:
+Enable the required services:
 
 ```text
 Firebase Authentication
 Cloud Firestore
 ```
 
-Configure the authentication providers required by the application.
+Configure Email/Password authentication.
 
-Install the FlutterFire CLI if it is not already installed:
+Install FlutterFire CLI if required:
 
 ```bash
 dart pub global activate flutterfire_cli
 ```
 
-Configure Firebase for the Flutter project:
+Configure Firebase:
 
 ```bash
 flutterfire configure
 ```
 
-This generates the platform-specific Firebase configuration used by:
+This generates the required Firebase configuration file:
 
 ```text
 lib/firebase_options.dart
 ```
 
-Do not commit private credentials or sensitive configuration values that should not be publicly exposed.
+The application initializes Firebase using:
+
+```dart
+Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
+```
+
+---
+
+# Firestore Configuration
+
+Create the required Firestore database in the Firebase Console.
+
+Configure appropriate Firestore Security Rules before production deployment.
+
+A transaction should be associated with the authenticated user's Firebase UID.
+
+Conceptually:
+
+```text
+Transaction
+    |
+    └── userId
+          |
+          └── Firebase Authentication UID
+```
+
+This association allows application logic and Firestore Security Rules to enforce user-specific data access.
 
 ---
 
 # Running the Application
 
-Run the application using:
-
-```bash
-flutter run
-```
-
-To view available devices:
+Check available devices:
 
 ```bash
 flutter devices
 ```
 
-Run the application on a specific device:
+Run the application:
+
+```bash
+flutter run
+```
+
+Run on a specific device:
 
 ```bash
 flutter run -d <device-id>
@@ -985,9 +933,9 @@ flutter run -d <device-id>
 
 ---
 
-# Testing
+# Testing and Code Quality
 
-Run automated Flutter tests:
+Run Flutter tests:
 
 ```bash
 flutter test
@@ -999,101 +947,93 @@ Run static analysis:
 flutter analyze
 ```
 
-Format the Dart source code:
+Format the project:
 
 ```bash
 dart format .
 ```
 
+These commands help maintain code consistency and identify potential issues before deployment.
+
 ---
 
 # Supported Platforms
 
-The application is designed using Flutter's cross-platform architecture and can target:
+The application is designed as a cross-platform Flutter application.
+
+Supported targets include:
 
 * Android
 * iOS
 * Web
 
-Additional platform-specific configuration may be required for Firebase and camera/gallery functionality.
+Some Firebase and device-specific features may require additional platform configuration.
+
+For example, camera and gallery functionality may require appropriate platform permissions.
 
 ---
 
 # Security
 
-Security is important because the application handles personal financial information.
+Because the application handles personal financial information, appropriate security practices should be followed.
 
-The application uses Firebase Authentication to identify users and associates transactions with authenticated user IDs.
+## Authentication
 
-Production Firestore Security Rules should restrict users to their own data.
+Firebase Authentication is used to identify users securely.
 
-A conceptual access rule is:
+## User-Specific Data
+
+Transactions are associated with the authenticated user's Firebase UID.
+
+## Firestore Security Rules
+
+Production Firestore rules should ensure that users can only access their own financial records.
+
+Conceptually:
 
 ```text
-A user may access a transaction only when:
-
-transaction.userId == request.auth.uid
+Authenticated User
+        |
+        v
+Firebase UID
+        |
+        v
+Transaction.userId
+        |
+        v
+Access Allowed
 ```
 
-Firebase credentials and other sensitive configuration values should not be hard-coded into application source code.
+Requests where the authenticated UID does not match the transaction's user ID should be rejected by the database security rules.
 
-Authentication and database security rules should be reviewed before production deployment.
+## Sensitive Configuration
 
----
-
-# UI and UX
-
-The application follows a clean, modern fintech-inspired design system.
-
-## Design Principles
-
-### Clarity
-
-Financial information should be understandable at a glance.
-
-### Consistency
-
-Reusable components maintain consistent spacing, typography, colours, and interaction patterns.
-
-### Visual Hierarchy
-
-Important information such as net balance, income, and expenses receives stronger visual emphasis.
-
-### Accessibility
-
-The interface uses appropriate colour contrast and readable typography.
-
-### Minimalism
-
-The interface focuses on essential financial information and actions without unnecessary visual elements.
-
-### Responsiveness
-
-Layouts are designed to adapt to different screen sizes and platforms.
+Sensitive credentials and private configuration information should not be committed to public repositories.
 
 ---
 
 # Screenshots
 
-Add screenshots of the application to this section.
+Add application screenshots to demonstrate the main functionality.
 
 Recommended screenshots:
 
 ```text
 screenshots/
-|
+│
 ├── login.png
 ├── register.png
-├── dashboard.png
-├── transactions.png
-├── add_transaction.png
+├── home.png
+├── add-expense.png
+├── edit-expense.png
+├── search-filter.png
 ├── statistics.png
 ├── settings.png
-├── firebase_sync.png
-└── dark_mode.png
+├── live-sync.png
+└── dark-mode.png
 ```
 
-Example:
+Example Markdown:
 
 ```markdown
 ## Screenshots
@@ -1104,64 +1044,76 @@ Example:
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/home.png)
 
-### Transaction Management
+### Add Expense
 
-![Transactions](screenshots/transactions.png)
+![Add Expense](screenshots/add-expense.png)
+
+### Search and Filtering
+
+![Search and Filtering](screenshots/search-filter.png)
 
 ### Statistics
 
 ![Statistics](screenshots/statistics.png)
 
-### Settings and Firebase Status
+### Settings
 
 ![Settings](screenshots/settings.png)
+
+### Dark Mode
+
+![Dark Mode](screenshots/dark-mode.png)
 ```
 
 ---
 
 # Future Improvements
 
-Potential future improvements include:
+Potential future enhancements include:
 
-* Budget management
-* Monthly and yearly spending limits
+* Budget creation and tracking
+* Monthly spending limits
 * Budget notifications
 * Recurring transactions
 * Savings goals
+* Financial report generation
 * CSV export
-* PDF financial reports
-* Advanced transaction filtering
-* Multiple financial accounts
+* PDF report generation
+* Advanced transaction sorting
+* Advanced financial filtering
 * Push notifications
 * Receipt OCR
+* Automatic receipt categorization
 * Automatic transaction categorization
-* Advanced financial analytics
-* AI-powered spending insights
-* Cloud Storage integration for receipt images
+* Cloud Storage for receipt images
+* Multiple financial accounts
 * Financial forecasting
+* Advanced financial insights
+* AI-assisted spending analysis
 
 ---
 
 # Project Development Practices
 
-The project follows development practices intended to improve maintainability and scalability.
+The project demonstrates several software development practices:
 
-These include:
-
-* Separation of UI and business logic
+* Layered application architecture
 * Provider-based state management
-* Reusable widgets
-* Service abstraction for Firebase operations
+* Separation of UI and business logic
+* Service-based Firebase integration
+* Reusable Flutter widgets
 * Model-based data representation
-* Centralized theme configuration
-* Centralized application colours
-* Modular project structure
-* Real-time Firestore data streams
-* User-specific data handling
-* Responsive transaction operations
-* Platform-specific Firebase configuration
+* Real-time Firestore streams
+* Local preference persistence
+* Responsive UI design
+* Material 3 design system
+* User-specific data management
+* CRUD implementation
+* Multi-criteria filtering
+* Financial data visualization
+* Cross-platform development
 
 ---
 
@@ -1169,62 +1121,58 @@ These include:
 
 Contributions are welcome.
 
-To contribute:
+## 1. Fork the Repository
 
-### 1. Fork the repository
+Create your own fork of the project.
 
-```bash
-git fork
-```
-
-### 2. Create a feature branch
+## 2. Create a Feature Branch
 
 ```bash
 git checkout -b feature/your-feature
 ```
 
-### 3. Make your changes
+## 3. Make Your Changes
 
-Implement and test the required functionality.
+Implement the required feature or fix.
 
-### 4. Commit your changes
+## 4. Test the Application
+
+Run:
+
+```bash
+flutter analyze
+flutter test
+```
+
+## 5. Format the Code
+
+```bash
+dart format .
+```
+
+## 6. Commit Your Changes
 
 ```bash
 git commit -m "Add your feature"
 ```
 
-### 5. Push the branch
+## 7. Push Your Branch
 
 ```bash
 git push origin feature/your-feature
 ```
 
-### 6. Create a Pull Request
+## 8. Create a Pull Request
 
-Provide a clear description of the changes and include screenshots where appropriate.
-
----
-
-# Issue Reporting
-
-If you encounter a bug, create a GitHub issue containing:
-
-* Description of the issue
-* Steps to reproduce
-* Expected behaviour
-* Actual behaviour
-* Device and operating system
-* Flutter version
-* Relevant screenshots
-* Error logs, if available
+Provide a clear description of the changes and include relevant screenshots where appropriate.
 
 ---
 
 # License
 
-This project is currently intended for educational and portfolio purposes.
+This project is currently intended for educational, portfolio, and demonstration purposes.
 
-A suitable open-source or proprietary license should be added before distributing the application publicly or commercially.
+If the project is distributed publicly or commercially, an appropriate open-source or proprietary license should be added.
 
 ---
 
@@ -1234,7 +1182,7 @@ A suitable open-source or proprietary license should be added before distributin
 
 Software Engineering Student / Developer
 
-### Technologies Demonstrated
+## Technologies Demonstrated
 
 ```text
 Flutter
@@ -1244,39 +1192,54 @@ Firebase Authentication
 Cloud Firestore
 Provider
 Material 3
+SharedPreferences
 fl_chart
 image_picker
 intl
 State Management
-Cloud Data Management
-Real-Time Synchronization
+Real-Time Data Synchronization
+CRUD Operations
+Financial Analytics
 Responsive UI Development
-Mobile Application Development
+Cross-Platform Application Development
 ```
 
 ---
 
 # Project Status
 
-**Status:** Completed
+**Status: Completed**
 
-The application currently provides:
+The current implementation includes:
 
 * Firebase Authentication
-* User registration and login
-* Transaction CRUD operations
-* Cloud Firestore integration
-* Real-time transaction synchronization
-* Firebase platform-specific initialization
-* Responsive transaction saving and editing
-* Financial summaries
-* Interactive financial analytics
-* Receipt attachments
-* Transaction categorization
+* Email/password registration and login
+* Persistent authentication sessions
+* User-specific transaction management
+* Full transaction CRUD
+* Receipt image attachments
+* Camera and gallery support
+* Real-time Cloud Firestore synchronization
+* Firestore offline persistence
+* Monthly expense summaries
+* Previous/next month navigation
+* Interactive category pie charts
+* Category percentage breakdowns
+* Keyword search
+* Category filtering
+* Custom date-range filtering
+* Clear filter functionality
+* Multi-criteria transaction filtering
 * Multi-currency support
-* Light and dark themes
-* Firebase synchronization status indicators
+* Persistent currency preferences
+* Light mode
+* Dark mode
+* System default theme
+* Persistent theme preferences
+* Firebase service status indicators
+* Live synchronization indicators
 * Provider-based state management
-* Modular application architecture
+* Material 3 UI
+* Cross-platform Flutter architecture
 
-The project can be extended in future iterations with budgeting, advanced reporting, notifications, automated receipt processing, and additional financial analytics.
+The project provides a complete foundation for a personal finance management application and can be extended with budgeting, financial reports, notifications, OCR-based receipt processing, and advanced financial analytics.
